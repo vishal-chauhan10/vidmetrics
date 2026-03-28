@@ -30,8 +30,7 @@ export async function GET(request: NextRequest) {
     const channel = await fetchChannel(identifier);
 
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const rawVideos = await fetchChannelVideos(channel.id, startOfMonth);
+    const rawVideos = await fetchChannelVideos(channel.id);
     const videos = enrichVideosWithMetrics(rawVideos);
 
     const totalViews = videos.reduce((sum, v) => sum + v.viewCount, 0);

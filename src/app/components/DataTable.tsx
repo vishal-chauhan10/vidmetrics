@@ -9,10 +9,12 @@ export function DataTable({
   title,
   videos,
   channelTitle,
+  emptyStateMessage,
 }: {
   title: string;
   videos: VideoMetrics[];
   channelTitle: string;
+  emptyStateMessage?: string;
 }) {
   const [selectedVideo, setSelectedVideo] = useState<VideoMetrics | null>(null);
 
@@ -72,39 +74,56 @@ export function DataTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {videos.map((video) => (
-              <tr 
-                key={video.id} 
-                onClick={() => setSelectedVideo(video)}
-                className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer group"
-              >
-                <td className="py-4 px-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-24 h-14 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden relative flex-shrink-0">
-                      <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
-                      <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded font-medium">{formatDuration(video.duration)}</div>
+            {videos.length > 0 ? (
+              videos.map((video) => (
+                <tr 
+                  key={video.id} 
+                  onClick={() => setSelectedVideo(video)}
+                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer group"
+                >
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-24 h-14 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden relative flex-shrink-0">
+                        <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded font-medium">{formatDuration(video.duration)}</div>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{video.title}</h4>
+                        {video.isTrending && (
+                          <span
+                            title="Above channel average velocity"
+                            aria-label="Above channel average velocity"
+                            className="inline-flex items-center mt-1 text-orange-600 dark:text-orange-500 bg-orange-100 dark:bg-orange-500/10 p-1 rounded"
+                          >
+                            <Flame size={10} />
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{video.title}</h4>
-                      {video.isTrending && (
-                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-500 bg-orange-100 dark:bg-orange-500/10 px-1.5 py-0.5 rounded">
-                          <Flame size={10} /> Trending
-                        </span>
-                      )}
-                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{formatPublishedDate(video.publishedAt)}</td>
+                  <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{formatNumber(video.viewCount)}</td>
+                  <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{video.engagementRate}%</td>
+                  <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{formatNumber(video.velocity)}/day</td>
+                  <td className="py-4 px-6 text-right">
+                    <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors" onClick={(e) => { e.stopPropagation(); }}>
+                      <MoreHorizontal size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="px-6 py-14 text-center">
+                  <div className="mx-auto max-w-md rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/80 px-6 py-8 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">No videos in this range</p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                      {emptyStateMessage ?? 'This channel has no videos matching the current filters.'}
+                    </p>
                   </div>
                 </td>
-                <td className="py-4 px-6 text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{formatPublishedDate(video.publishedAt)}</td>
-                <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{formatNumber(video.viewCount)}</td>
-                <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{video.engagementRate}%</td>
-                <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{formatNumber(video.velocity)}/day</td>
-                <td className="py-4 px-6 text-right">
-                  <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors" onClick={(e) => { e.stopPropagation(); }}>
-                    <MoreHorizontal size={18} />
-                  </button>
-                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -150,7 +169,7 @@ export function DataTable({
                   <Sparkles size={16} className="text-emerald-500" /> AI Retention Insights
                 </h4>
                 <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-4 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  Performance score is {selectedVideo.performanceScore} with {selectedVideo.isTrending ? 'above-average' : 'normal'} velocity. Stronger packaging around similar themes is the clearest next experiment.
+                  Performance score is {selectedVideo.performanceScore} with {selectedVideo.isTrending ? 'above-channel-average' : 'normal'} velocity. This is measured against this channel&apos;s own recent catalog, not YouTube-wide trending.
                 </div>
               </div>
 

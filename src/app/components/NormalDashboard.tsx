@@ -37,6 +37,9 @@ export function NormalDashboard({
   const [isCompareOpen, setIsCompareOpen] = useState(Boolean(compareChannelQuery));
   const [compareValue, setCompareValue] = useState(compareChannelQuery);
   const videoSectionTitle = timeRange === 'all' ? 'All Videos' : 'Recent Videos';
+  const emptyVideosMessage = getEmptyVideosMessage(timeRange, analysis.channel.title);
+  const headerBackgroundImage = analysis.channel.bannerUrl || analysis.channel.thumbnailUrl;
+  const hasBannerImage = Boolean(analysis.channel.bannerUrl);
   const overviewStats = useMemo(() => {
     const channelAgeYears = getChannelAgeYears(analysis.channel.publishedAt);
     const trendingVideos = videos.filter((video) => video.isTrending).length;
@@ -70,7 +73,7 @@ export function NormalDashboard({
       {
         label: 'Avg. Engagement',
         value: `${analysis.averageEngagement.toFixed(2)}%`,
-        subtext: `${trendingVideos} trending videos`,
+        subtext: `${trendingVideos} above-channel-average videos`,
       },
     ];
   }, [analysis, videos]);
@@ -163,21 +166,43 @@ export function NormalDashboard({
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white/90 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-          <div className="border-b border-zinc-200 bg-gradient-to-r from-emerald-500/12 via-transparent to-transparent p-6 dark:border-zinc-800">
-            <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="relative border-b border-zinc-200 dark:border-zinc-800">
+            {headerBackgroundImage ? (
+              <div
+                className={`absolute inset-0 bg-cover bg-center ${hasBannerImage ? '' : 'scale-110 blur-2xl opacity-35'}`}
+                style={{ backgroundImage: `url(${headerBackgroundImage})` }}
+                aria-hidden="true"
+              />
+            ) : null}
+            <div
+              className={`absolute inset-0 ${
+                hasBannerImage
+                  ? 'bg-gradient-to-r from-zinc-950/92 via-zinc-950/82 to-zinc-950/68'
+                  : 'bg-gradient-to-r from-zinc-950/88 via-zinc-950/72 to-zinc-950/78'
+              }`}
+            />
+            {!hasBannerImage ? (
+              <div
+                className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(16,185,129,0.24),transparent_28%),radial-gradient(circle_at_right,rgba(244,244,245,0.08),transparent_18%)]"
+                aria-hidden="true"
+              />
+            ) : null}
+
+            <div className="relative z-10 p-6">
+              <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
               <div className="flex items-start gap-4">
                 <img
                   src={analysis.channel.thumbnailUrl}
                   alt={analysis.channel.title}
-                  className="h-16 w-16 rounded-2xl border border-zinc-200 object-cover shadow-sm dark:border-zinc-800"
+                  className="h-16 w-16 rounded-2xl border border-white/15 object-cover shadow-sm"
                 />
                 <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-400">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
                     Channel Intelligence
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{analysis.channel.title}</h3>
-                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    <h3 className="text-xl font-semibold text-white">{analysis.channel.title}</h3>
+                    <p className="mt-1 text-sm text-zinc-300">
                       {getChannelIdentity(analysis.channel.customUrl, analysis.channel.title)}
                     </p>
                   </div>
@@ -186,13 +211,14 @@ export function NormalDashboard({
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {overviewStats.map((stat) => (
-                  <div key={stat.label} className="min-w-[160px] rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">{stat.label}</p>
-                    <p className="mt-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{stat.value}</p>
-                    <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{stat.subtext}</p>
+                  <div key={stat.label} className="min-w-[160px] rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{stat.label}</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{stat.value}</p>
+                    <p className="mt-1 text-xs text-zinc-400">{stat.subtext}</p>
                   </div>
                 ))}
               </div>
+            </div>
             </div>
           </div>
 
@@ -214,18 +240,18 @@ export function NormalDashboard({
             <div className="bg-white px-6 py-4 dark:bg-zinc-900">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Benchmark Lens</p>
               <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
-                This section is modeled after the high-signal summary Social Blade provides, but compressed into a cleaner operator view.
+                This section distills the channel into a compact operator view so the core performance signals are easy to scan.
               </p>
             </div>
           </div>
         </div>
 
         {(isCompareOpen || compareAnalysis || compareLoading || compareError) && (
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/45 p-4 shadow-sm dark:border-sky-900/40 dark:bg-sky-950/12">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Compare With Your Channel</p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="text-sm font-semibold text-sky-950 dark:text-sky-100">Compare With Your Channel</p>
+                <p className="text-sm text-sky-800/80 dark:text-sky-200/70">
                   Add your own channel to benchmark against {analysis.channel.title} without leaving this view.
                 </p>
               </div>
@@ -247,12 +273,12 @@ export function NormalDashboard({
                   value={compareValue}
                   onChange={(event) => setCompareValue(event.target.value)}
                   placeholder="https://youtube.com/@yourchannel or @yourchannel"
-                  className="h-11 flex-1 rounded-xl border border-zinc-200 bg-white px-4 text-sm text-zinc-700 outline-none transition focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
+                  className="h-11 flex-1 rounded-xl border border-sky-200 bg-white px-4 text-sm text-zinc-700 outline-none transition focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/20 dark:border-sky-900/40 dark:bg-zinc-950 dark:text-zinc-200"
                 />
                 <div className="flex items-center gap-2">
                   <button
                     type="submit"
-                    className="inline-flex h-11 items-center justify-center rounded-xl bg-emerald-500 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-sky-500 px-4 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-70"
                     disabled={compareLoading || compareValue.trim().length === 0}
                   >
                     {compareLoading ? 'Analyzing...' : 'Compare'}
@@ -272,7 +298,7 @@ export function NormalDashboard({
             )}
 
             {compareLoading && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
+              <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white/80 px-3 py-2 text-sm text-sky-800 dark:border-sky-900/40 dark:bg-zinc-950/80 dark:text-sky-200">
                 <LoaderCircle size={16} className="animate-spin" />
                 Pulling analytics for your channel.
               </div>
@@ -285,10 +311,10 @@ export function NormalDashboard({
             )}
 
             {compareAnalysis && !compareLoading && (
-              <div className="mt-4 rounded-2xl border border-emerald-500/15 bg-gradient-to-r from-emerald-500/8 to-transparent p-4">
+              <div className="mt-4 rounded-2xl border border-sky-500/15 bg-gradient-to-r from-sky-500/10 to-transparent p-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
                       Your Channel Loaded
                     </div>
                     <h3 className="mt-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{compareAnalysis.channel.title}</h3>
@@ -326,10 +352,23 @@ export function NormalDashboard({
       </section>
 
       <section id="videos" data-dashboard-section="videos">
-        <DataTable title={videoSectionTitle} videos={videos} channelTitle={analysis.channel.title} />
+        <DataTable
+          title={videoSectionTitle}
+          videos={videos}
+          channelTitle={analysis.channel.title}
+          emptyStateMessage={emptyVideosMessage}
+        />
       </section>
     </div>
   );
+}
+
+function getEmptyVideosMessage(timeRange: TimeRange, channelTitle: string) {
+  if (timeRange === 'all') {
+    return `${channelTitle} does not have any public uploads available right now.`;
+  }
+
+  return `No public uploads were found for ${channelTitle} in the selected window. Switch to All Videos to inspect the older catalog.`;
 }
 
 function formatPublishedDate(value: string) {

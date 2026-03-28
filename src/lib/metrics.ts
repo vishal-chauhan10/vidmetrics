@@ -81,7 +81,7 @@ export function enrichVideosWithMetrics(
 }
 
 export function exportToCsv(videos: VideoMetrics[], channelName: string): void {
-  const headers = ['Title', 'Published', 'Views', 'Likes', 'Comments', 'Engagement Rate (%)', 'Views/Day', 'Performance Score', 'Trending'];
+  const headers = ['Title', 'Published', 'Views', 'Likes', 'Comments', 'Engagement Rate (%)', 'Views/Day', 'Performance Score', 'Above Channel Average'];
   const rows = videos.map((v) => [
     `"${v.title.replace(/"/g, '""')}"`,
     new Date(v.publishedAt).toLocaleDateString(),

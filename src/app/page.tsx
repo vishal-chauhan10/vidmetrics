@@ -1,11 +1,77 @@
 'use client';
 
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, BarChart3, TrendingUp, Zap, Moon, Sun } from 'lucide-react';
 import { useTheme } from './themeContext';
+import { getChannelInputError } from '@/lib/youtube';
 
 export default function HomePage() {
-  const { isDarkMode, toggleTheme } = useTheme();
+  return (
+    <Suspense fallback={<HomePageShell isLoading />}> 
+      <HomePageContent />
+    </Suspense>
+  );
+}
 
+function HomePageContent() {
+  const { isDarkMode, toggleTheme } = useTheme();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [channelValue, setChannelValue] = useState(searchParams.get('channel') ?? '');
+  const [showValidation, setShowValidation] = useState(Boolean(searchParams.get('inputError')));
+
+  useEffect(() => {
+    setChannelValue(searchParams.get('channel') ?? '');
+    setShowValidation(Boolean(searchParams.get('inputError')));
+  }, [searchParams]);
+
+  const channelError = useMemo(() => {
+    if (!showValidation && channelValue.trim().length === 0) {
+      return null;
+    }
+
+    return getChannelInputError(channelValue);
+  }, [channelValue, showValidation]);
+
+  const isSubmitDisabled = channelValue.trim().length === 0 || channelError !== null;
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setShowValidation(true);
+
+    const validationError = getChannelInputError(channelValue);
+    if (validationError) {
+      return;
+    }
+
+    router.push(`/analyze?channel=${encodeURIComponent(channelValue.trim())}`);
+  }
+
+  return <HomePageShell isDarkMode={isDarkMode} toggleTheme={toggleTheme} channelValue={channelValue} setChannelValue={setChannelValue} channelError={channelError} isSubmitDisabled={isSubmitDisabled} handleSubmit={handleSubmit} />;
+}
+
+interface HomePageShellProps {
+  isLoading?: boolean;
+  isDarkMode?: boolean;
+  toggleTheme?: () => void;
+  channelValue?: string;
+  setChannelValue?: (value: string) => void;
+  channelError?: string | null;
+  isSubmitDisabled?: boolean;
+  handleSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
+}
+
+function HomePageShell({
+  isLoading = false,
+  isDarkMode = false,
+  toggleTheme = () => {},
+  channelValue = '',
+  setChannelValue = () => {},
+  channelError = null,
+  isSubmitDisabled = true,
+  handleSubmit = () => {},
+}: HomePageShellProps) {
   return (
     <div
       className={`min-h-screen px-6 py-16 ${
@@ -66,7 +132,7 @@ export default function HomePage() {
               <div className="h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.5)]" />
             </div>
 
-            <form action="/analyze" method="get" className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <label className={`block text-xs font-semibold uppercase tracking-[0.18em] ${isDarkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
                 Channel URL or Handle
               </label>
@@ -74,7 +140,9 @@ export default function HomePage() {
                 <Search className={`pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`} size={18} />
                 <input
                   type="text"
-                  name="channel"
+                  value={channelValue}
+                  onChange={(event) => setChannelValue(event.target.value)}
+                  disabled={isLoading}
                   placeholder="https://youtube.com/@mkbhd or @mkbhd"
                   className={`h-14 w-full rounded-2xl border pl-12 pr-4 text-sm outline-none transition focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/20 ${
                     isDarkMode
@@ -83,11 +151,15 @@ export default function HomePage() {
                   }`}
                 />
               </div>
+              {channelError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{channelError}</p>
+              )}
               <button
                 type="submit"
-                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
+                disabled={isSubmitDisabled || isLoading}
+                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Run Channel Analysis
+                {isLoading ? 'Preparing...' : 'Run Channel Analysis'}
               </button>
             </form>
 

@@ -37,7 +37,7 @@ export function KPICards({ analysis, videos }: { analysis: AnalysisResult; video
     {
       title: 'Avg. Velocity',
       value: `${formatNumber(averageVelocity)}/day`,
-      trend: `${trendingVideos} trending`,
+      trend: `${trendingVideos} above avg`,
       isPositive: trendingVideos > 0,
       icon: <TrendingUp size={18} />,
     },

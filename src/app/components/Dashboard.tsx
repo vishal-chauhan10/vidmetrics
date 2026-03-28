@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { ArrowUp } from 'lucide-react';
 import { Sidebar, type DashboardSectionId } from './Sidebar';
 import { TopNav } from './TopNav';
 import { NormalDashboard } from './NormalDashboard';
@@ -37,7 +38,27 @@ export function Dashboard({
 }: DashboardProps) {
   const [isBattleMode] = useState(false);
   const [activeSection, setActiveSection] = useState<DashboardSectionId>('overview');
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+
+    if (!scrollContainer) {
+      return;
+    }
+
+    const handleScroll = () => {
+      setShowScrollToTop(scrollContainer.scrollTop > 320);
+    };
+
+    handleScroll();
+    scrollContainer.addEventListener('scroll', handleScroll);
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -102,6 +123,19 @@ export function Dashboard({
     });
   }
 
+  function handleScrollToTop() {
+    const scrollContainer = scrollContainerRef.current;
+
+    if (!scrollContainer) {
+      return;
+    }
+
+    scrollContainer.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
       <Sidebar activeSection={activeSection} onSectionSelect={handleSectionSelect} />
@@ -126,6 +160,16 @@ export function Dashboard({
             )}
           </div>
         </div>
+        {showScrollToTop ? (
+          <button
+            type="button"
+            onClick={handleScrollToTop}
+            aria-label="Scroll to top"
+            className="absolute bottom-6 right-6 inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-700 shadow-lg shadow-zinc-300/30 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-200 dark:shadow-black/30"
+          >
+            <ArrowUp size={18} />
+          </button>
+        ) : null}
       </main>
     </div>
   );

@@ -6,6 +6,7 @@ import { AlertTriangle } from 'lucide-react';
 import { Dashboard } from '../components/Dashboard';
 import type { AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
 import { isWithinInterval, startOfMonth, subDays } from 'date-fns';
+import { getChannelInputError } from '@/lib/youtube';
 
 export default function AnalyzePage() {
   return (
@@ -29,6 +30,7 @@ function AnalyzePageContent() {
   const [compareError, setCompareError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
   const [sortField, setSortField] = useState<SortField>('publishedAt');
+  const channelInputError = channelParam ? getChannelInputError(channelParam) : null;
 
   const fetchAnalysis = useCallback(async (channel: string) => {
     setLoading(true);
@@ -51,10 +53,21 @@ function AnalyzePageContent() {
   }, []);
 
   useEffect(() => {
-    if (channelParam) {
+    if (channelParam && !channelInputError) {
       fetchAnalysis(channelParam);
     }
-  }, [channelParam, fetchAnalysis]);
+  }, [channelInputError, channelParam, fetchAnalysis]);
+
+  useEffect(() => {
+    if (!channelParam || !channelInputError) {
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set('channel', channelParam);
+    params.set('inputError', 'invalid-channel');
+    router.replace(`/?${params.toString()}`);
+  }, [channelInputError, channelParam, router]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -152,6 +165,10 @@ function AnalyzePageContent() {
 
   if (!channelParam) {
     router.push('/');
+    return null;
+  }
+
+  if (channelInputError) {
     return null;
   }
 

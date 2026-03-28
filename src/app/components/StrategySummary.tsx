@@ -29,7 +29,7 @@ export function StrategySummary({ videos }: { videos: VideoMetrics[] }) {
         <p>
           {trendingCount > 0
             ? `${trendingCount} videos are showing above-average velocity. Publish adjacent follow-ups while momentum is still compounding.`
-            : 'No current videos are flagged as trending. The next lever is topic selection rather than cadence alone.'}
+            : 'No current videos are outperforming the channel average on velocity. The next lever is topic selection rather than cadence alone.'}
         </p>
       </div>
     </div>

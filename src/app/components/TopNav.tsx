@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../themeContext';
+import { getChannelInputError } from '@/lib/youtube';
 
 interface TopNavProps {
   channelQuery: string;
@@ -13,23 +15,36 @@ export function TopNav({ channelQuery }: TopNavProps) {
   const { isDarkMode, toggleTheme } = useTheme();
   const router = useRouter();
   const [value, setValue] = useState(channelQuery);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const channelError = useMemo(() => {
+    if (!showValidation && value.trim().length === 0) {
+      return null;
+    }
+
+    return getChannelInputError(value);
+  }, [showValidation, value]);
 
   useEffect(() => {
     setValue(channelQuery);
+    setShowValidation(false);
   }, [channelQuery]);
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = value.trim();
-    if (!trimmed) return;
+    setShowValidation(true);
+    if (getChannelInputError(trimmed)) return;
     router.push(`/analyze?channel=${encodeURIComponent(trimmed)}`);
   }
 
   return (
     <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-20">
       <div className="flex items-center gap-4">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">VidMetrics</h1>
-        <form onSubmit={onSubmit} className="hidden md:block">
+        <Link href="/" className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          VidMetrics
+        </Link>
+        <form onSubmit={onSubmit} className="relative hidden md:block">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-500 dark:text-zinc-400 w-80">
             <Search size={16} />
             <input
@@ -39,6 +54,9 @@ export function TopNav({ channelQuery }: TopNavProps) {
               className="w-full bg-transparent text-zinc-700 outline-none placeholder:text-zinc-500 dark:text-zinc-200 dark:placeholder:text-zinc-500"
             />
           </div>
+          {channelError && (
+            <p className="absolute top-full mt-2 text-xs text-red-600 dark:text-red-400">{channelError}</p>
+          )}
         </form>
       </div>
 

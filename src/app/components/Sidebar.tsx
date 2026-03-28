@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { LayoutDashboard, BarChart3, Users, Settings, Video, type LucideIcon } from 'lucide-react';
 
 export type DashboardSectionId = 'overview' | 'strategy' | 'trends' | 'videos';
@@ -20,9 +21,13 @@ const navItems: Array<{ id: DashboardSectionId; label: string; icon: LucideIcon 
 export function Sidebar({ activeSection, onSectionSelect }: SidebarProps) {
   return (
     <aside className="w-16 flex-shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col items-center py-6 gap-8 z-10 h-full">
-      <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
+      <Link
+        href="/"
+        aria-label="Go to landing page"
+        className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20"
+      >
         V
-      </div>
+      </Link>
       <nav className="flex flex-col gap-6 w-full items-center text-zinc-400 dark:text-zinc-500">
         {navItems.map(({ id, label, icon: Icon }) => {
           const isActive = activeSection === id;

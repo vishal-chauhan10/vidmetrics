@@ -46,6 +46,30 @@ export function extractChannelIdentifier(input: string): { type: 'handle' | 'id'
   return null;
 }
 
+export function getChannelInputError(input: string): string | null {
+  const trimmed = input.trim();
+
+  if (!trimmed) {
+    return 'Enter a channel handle or YouTube channel URL.';
+  }
+
+  const looksLikeUrl = trimmed.startsWith('http') || trimmed.includes('youtube.com/');
+
+  if (looksLikeUrl) {
+    return extractChannelIdentifier(trimmed)
+      ? null
+      : 'Enter a valid YouTube channel URL.';
+  }
+
+  if (!trimmed.startsWith('@')) {
+    return 'Handles should start with @.';
+  }
+
+  return /^@[a-zA-Z0-9._-]+$/.test(trimmed)
+    ? null
+    : 'Enter a valid YouTube handle.';
+}
+
 async function youtubeGet<T>(endpoint: string, params: Record<string, string>): Promise<T> {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('NO_API_KEY');
