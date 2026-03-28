@@ -1,0 +1,37 @@
+import React from 'react';
+import { Sparkles } from 'lucide-react';
+import type { VideoMetrics } from '@/types/youtube';
+
+export function StrategySummary({ videos }: { videos: VideoMetrics[] }) {
+  if (videos.length === 0) {
+    return null;
+  }
+
+  const topVideo = [...videos].sort((left, right) => right.performanceScore - left.performanceScore)[0];
+  const averageViews = videos.reduce((sum, video) => sum + video.viewCount, 0) / videos.length;
+  const averageEngagement = videos.reduce((sum, video) => sum + video.engagementRate, 0) / videos.length;
+  const outlierFactor = averageViews > 0 ? (topVideo.viewCount / averageViews).toFixed(1) : '0.0';
+  const trendingCount = videos.filter((video) => video.isTrending).length;
+
+  return (
+    <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-zinc-900 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-6 shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles size={20} className="text-emerald-500" />
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">AI Strategy Summary</h2>
+      </div>
+      <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-4xl">
+        <p>
+          <strong className="text-emerald-600 dark:text-emerald-400">{topVideo.title}</strong> is the current outlier at {outlierFactor}x the channel average. That topic and thumbnail style are the clearest short-term follow-up candidates.
+        </p>
+        <p>
+          Average engagement is <strong className="text-emerald-600 dark:text-emerald-400">{averageEngagement.toFixed(2)}%</strong>. {averageEngagement >= 5 ? 'Audience response is healthy; keep the current content packaging.' : 'Audience response is softer; tighten hooks and clearer titles would help.'}
+        </p>
+        <p>
+          {trendingCount > 0
+            ? `${trendingCount} videos are showing above-average velocity. Publish adjacent follow-ups while momentum is still compounding.`
+            : 'No current videos are flagged as trending. The next lever is topic selection rather than cadence alone.'}
+        </p>
+      </div>
+    </div>
+  );
+}
