@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractChannelIdentifier, fetchChannel, fetchChannelVideos } from '@/lib/youtube';
+import { getAnalysisAiEnhancements } from '@/lib/ai';
 import { getMockChannel, getMockVideos } from '@/lib/mock-data';
 import { enrichVideosWithMetrics } from '@/lib/metrics';
 import type { AnalysisResult } from '@/types/youtube';
@@ -50,7 +51,12 @@ export async function GET(request: NextRequest) {
       isMockData: false,
     };
 
-    return NextResponse.json(result);
+    const aiEnhancements = await getAnalysisAiEnhancements(result);
+
+    return NextResponse.json({
+      ...result,
+      ...aiEnhancements,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -67,7 +73,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function buildMockResponse(): NextResponse {
+async function buildMockResponse(): Promise<NextResponse> {
   const mockChannel = getMockChannel();
   const mockRawVideos = getMockVideos();
   const videos = enrichVideosWithMetrics(mockRawVideos);
@@ -90,5 +96,8 @@ function buildMockResponse(): NextResponse {
     isMockData: true,
   };
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    ...result,
+    ...(await getAnalysisAiEnhancements(result)),
+  });
 }

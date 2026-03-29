@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle } from 'lucide-react';
 import { Dashboard } from '../components/Dashboard';
-import type { AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
+import type { AiCompareInsight, AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
 import { isWithinInterval, startOfMonth, subDays } from 'date-fns';
 import { getChannelInputError } from '@/lib/youtube';
 
@@ -28,6 +28,10 @@ function AnalyzePageContent() {
   const [compareData, setCompareData] = useState<AnalysisResult | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareError, setCompareError] = useState<string | null>(null);
+  const [compareInsight, setCompareInsight] = useState<AiCompareInsight | null>(null);
+  const [compareInsightLoading, setCompareInsightLoading] = useState(false);
+  const [compareInsightError, setCompareInsightError] = useState<string | null>(null);
+  const [activeCompareQuery, setActiveCompareQuery] = useState('');
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
   const [sortField, setSortField] = useState<SortField>('publishedAt');
   const channelInputError = channelParam ? getChannelInputError(channelParam) : null;
@@ -70,6 +74,69 @@ function AnalyzePageContent() {
   }, [channelInputError, channelParam, router]);
 
   useEffect(() => {
+    if (!channelParam || !compareParam) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('compare');
+    router.replace(`/analyze?${params.toString()}`);
+  }, [channelParam, compareParam, router, searchParams]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function fetchCompareInsight(primary: AnalysisResult, compare: AnalysisResult) {
+      setCompareInsightLoading(true);
+      setCompareInsightError(null);
+
+      try {
+        const response = await fetch('/api/compare-insights', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ primary, compare }),
+        });
+
+        const json = await response.json();
+
+        if (!response.ok) {
+          throw new Error(json.error || 'Failed to generate compare insight');
+        }
+
+        if (!isCancelled) {
+          setCompareInsight(json.insight);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setCompareInsight(null);
+          setCompareInsightError(err instanceof Error ? err.message : 'An unexpected error occurred');
+        }
+      } finally {
+        if (!isCancelled) {
+          setCompareInsightLoading(false);
+        }
+      }
+    }
+
+    if (!data || !compareData) {
+      setCompareInsight(null);
+      setCompareInsightError(null);
+      setCompareInsightLoading(false);
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    fetchCompareInsight(data, compareData);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [compareData, data]);
+
+  useEffect(() => {
     let isCancelled = false;
 
     async function fetchCompareAnalysis(compareChannel: string) {
@@ -99,7 +166,7 @@ function AnalyzePageContent() {
       }
     }
 
-    if (!compareParam) {
+    if (!activeCompareQuery) {
       setCompareData(null);
       setCompareError(null);
       setCompareLoading(false);
@@ -108,28 +175,15 @@ function AnalyzePageContent() {
       };
     }
 
-    fetchCompareAnalysis(compareParam);
+    fetchCompareAnalysis(activeCompareQuery);
 
     return () => {
       isCancelled = true;
     };
-  }, [compareParam]);
+  }, [activeCompareQuery]);
 
   function handleCompareChannelChange(compareChannel: string) {
-    if (!channelParam) {
-      return;
-    }
-
-    const params = new URLSearchParams(searchParams.toString());
-    const trimmed = compareChannel.trim();
-
-    if (trimmed) {
-      params.set('compare', trimmed);
-    } else {
-      params.delete('compare');
-    }
-
-    router.push(`/analyze?${params.toString()}`);
+    setActiveCompareQuery(compareChannel.trim());
   }
 
   const filteredVideos = useMemo<VideoMetrics[]>(() => {
@@ -141,10 +195,6 @@ function AnalyzePageContent() {
     if (timeRange === '7d') {
       videos = videos.filter((video) =>
         isWithinInterval(new Date(video.publishedAt), { start: subDays(now, 7), end: now })
-      );
-    } else if (timeRange === '30d') {
-      videos = videos.filter((video) =>
-        isWithinInterval(new Date(video.publishedAt), { start: subDays(now, 30), end: now })
       );
     } else if (timeRange === 'month') {
       videos = videos.filter((video) =>
@@ -186,9 +236,12 @@ function AnalyzePageContent() {
     <Dashboard
       analysis={data}
       compareAnalysis={compareData}
-      compareChannelQuery={compareParam ?? ''}
+      compareChannelQuery={activeCompareQuery}
       compareLoading={compareLoading}
       compareError={compareError}
+      compareInsight={compareInsight}
+      compareInsightLoading={compareInsightLoading}
+      compareInsightError={compareInsightError}
       onCompareChannelChange={handleCompareChannelChange}
       videos={filteredVideos}
       channelQuery={channelParam}

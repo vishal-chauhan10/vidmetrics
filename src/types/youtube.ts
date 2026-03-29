@@ -27,6 +27,28 @@ export interface VideoMetrics {
   isTrending: boolean;
 }
 
+export interface AiStrategySummary {
+  overview: string;
+  momentum: string;
+  contentGap: string;
+  nextActions: string[];
+}
+
+export interface AiVideoInsight {
+  videoId: string;
+  whyItWorked: string;
+  risks: string;
+  nextTitleIdeas: string[];
+  packagingTip: string;
+}
+
+export interface AiCompareInsight {
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  nextMove: string;
+}
+
 export interface AnalysisResult {
   channel: ChannelInfo;
   videos: VideoMetrics[];
@@ -36,8 +58,10 @@ export interface AnalysisResult {
   averageEngagement: number;
   totalViews: number;
   isMockData: boolean;
+  aiSummary?: AiStrategySummary;
+  aiVideoInsights?: AiVideoInsight[];
 }
 
 export type SortField = 'viewCount' | 'engagementRate' | 'velocity' | 'publishedAt' | 'performanceScore';
 export type SortOrder = 'asc' | 'desc';
-export type TimeRange = '7d' | '30d' | 'month' | 'all';
+export type TimeRange = '7d' | 'month' | 'all';

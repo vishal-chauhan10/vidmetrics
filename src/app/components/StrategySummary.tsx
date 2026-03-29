@@ -1,10 +1,36 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
-import type { VideoMetrics } from '@/types/youtube';
+import type { AiStrategySummary, VideoMetrics } from '@/types/youtube';
 
-export function StrategySummary({ videos }: { videos: VideoMetrics[] }) {
+export function StrategySummary({ videos, summary }: { videos: VideoMetrics[]; summary?: AiStrategySummary }) {
   if (videos.length === 0) {
     return null;
+  }
+
+  if (summary) {
+    return (
+      <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-zinc-900 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles size={20} className="text-emerald-500" />
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">AI Strategy Summary</h2>
+        </div>
+        <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-4xl">
+          <p>{summary.overview}</p>
+          <p>{summary.momentum}</p>
+          <p>{summary.contentGap}</p>
+          <div className="pt-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Next Actions</p>
+            <div className="mt-3 grid gap-2 md:grid-cols-2">
+              {summary.nextActions.map((action) => (
+                <div key={action} className="rounded-xl border border-emerald-100 bg-white/80 px-4 py-3 dark:border-emerald-900/40 dark:bg-zinc-950/40">
+                  <p className="text-sm text-zinc-700 dark:text-zinc-200">{action}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const topVideo = [...videos].sort((left, right) => right.performanceScore - left.performanceScore)[0];

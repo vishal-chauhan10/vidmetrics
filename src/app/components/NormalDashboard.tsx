@@ -5,7 +5,7 @@ import { StrategySummary } from './StrategySummary';
 import { PerformanceTrends } from './PerformanceTrends';
 import { DataTable } from './DataTable';
 import { formatNumber } from '@/lib/metrics';
-import type { AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
+import type { AiCompareInsight, AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
 
 interface NormalDashboardProps {
   analysis: AnalysisResult;
@@ -13,6 +13,9 @@ interface NormalDashboardProps {
   compareChannelQuery: string;
   compareLoading: boolean;
   compareError: string | null;
+  compareInsight: AiCompareInsight | null;
+  compareInsightLoading: boolean;
+  compareInsightError: string | null;
   onCompareChannelChange: (value: string) => void;
   videos: VideoMetrics[];
   timeRange: TimeRange;
@@ -27,6 +30,9 @@ export function NormalDashboard({
   compareChannelQuery,
   compareLoading,
   compareError,
+  compareInsight,
+  compareInsightLoading,
+  compareInsightError,
   onCompareChannelChange,
   videos,
   timeRange,
@@ -143,7 +149,6 @@ export function NormalDashboard({
             >
               <option value="month">This Month</option>
               <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
               <option value="all">All Videos</option>
             </select>
             <select
@@ -160,7 +165,7 @@ export function NormalDashboard({
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 text-sm font-medium text-emerald-600 transition hover:bg-emerald-500/15 dark:text-emerald-400"
             >
               <Plus size={15} />
-              {compareAnalysis ? 'Edit Your Channel' : 'Add Your Channel'}
+              Add Your Channel
             </button>
           </div>
         </div>
@@ -337,6 +342,41 @@ export function NormalDashboard({
                 </div>
               </div>
             )}
+
+            {compareInsightLoading && compareAnalysis ? (
+              <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white/80 px-3 py-2 text-sm text-sky-800 dark:border-sky-900/40 dark:bg-zinc-950/80 dark:text-sky-200">
+                <LoaderCircle size={16} className="animate-spin" />
+                Generating AI compare insight.
+              </div>
+            ) : null}
+
+            {compareInsightError && compareAnalysis ? (
+              <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+                {compareInsightError}
+              </div>
+            ) : null}
+
+            {compareInsight && compareAnalysis ? (
+              <div className="mt-4 rounded-2xl border border-sky-200 bg-white/70 p-4 dark:border-sky-900/40 dark:bg-zinc-950/40">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">AI Compare Insight</p>
+                    <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                      Structured from the metrics and top-performing videos across both channels.
+                    </p>
+                  </div>
+                  <div className="grid gap-3 lg:grid-cols-3">
+                    <CompareInsightList title="Strengths" items={compareInsight.strengths} />
+                    <CompareInsightList title="Weaknesses" items={compareInsight.weaknesses} />
+                    <CompareInsightList title="Opportunities" items={compareInsight.opportunities} />
+                  </div>
+                  <div className="rounded-xl border border-sky-100 bg-sky-50/70 px-4 py-3 dark:border-sky-900/30 dark:bg-sky-950/20">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Next Move</p>
+                    <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-200">{compareInsight.nextMove}</p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -344,7 +384,7 @@ export function NormalDashboard({
       </section>
 
       <section id="strategy" data-dashboard-section="strategy">
-        <StrategySummary videos={videos} />
+        <StrategySummary videos={videos} summary={analysis.aiSummary} />
       </section>
 
       <section id="trends" data-dashboard-section="trends">
@@ -357,8 +397,24 @@ export function NormalDashboard({
           videos={videos}
           channelTitle={analysis.channel.title}
           emptyStateMessage={emptyVideosMessage}
+          aiVideoInsights={analysis.aiVideoInsights}
         />
       </section>
+    </div>
+  );
+}
+
+function CompareInsightList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white/80 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">{title}</p>
+      <div className="mt-3 space-y-2 text-sm text-zinc-700 dark:text-zinc-200">
+        {items.map((item) => (
+          <div key={`${title}-${item}`} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900/80">
+            {item}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

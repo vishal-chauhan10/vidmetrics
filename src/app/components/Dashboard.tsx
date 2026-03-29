@@ -5,7 +5,7 @@ import { ArrowUp } from 'lucide-react';
 import { Sidebar, type DashboardSectionId } from './Sidebar';
 import { TopNav } from './TopNav';
 import { NormalDashboard } from './NormalDashboard';
-import type { AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
+import type { AiCompareInsight, AnalysisResult, SortField, TimeRange, VideoMetrics } from '@/types/youtube';
 
 interface DashboardProps {
   analysis: AnalysisResult;
@@ -13,6 +13,9 @@ interface DashboardProps {
   compareChannelQuery: string;
   compareLoading: boolean;
   compareError: string | null;
+  compareInsight: AiCompareInsight | null;
+  compareInsightLoading: boolean;
+  compareInsightError: string | null;
   onCompareChannelChange: (value: string) => void;
   videos: VideoMetrics[];
   channelQuery: string;
@@ -28,6 +31,9 @@ export function Dashboard({
   compareChannelQuery,
   compareLoading,
   compareError,
+  compareInsight,
+  compareInsightLoading,
+  compareInsightError,
   onCompareChannelChange,
   videos,
   channelQuery,
@@ -150,6 +156,9 @@ export function Dashboard({
                 compareChannelQuery={compareChannelQuery}
                 compareLoading={compareLoading}
                 compareError={compareError}
+                compareInsight={compareInsight}
+                compareInsightLoading={compareInsightLoading}
+                compareInsightError={compareInsightError}
                 onCompareChannelChange={onCompareChannelChange}
                 videos={videos}
                 timeRange={timeRange}

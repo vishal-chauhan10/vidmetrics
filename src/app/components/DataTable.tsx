@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Download, Share2, MoreHorizontal, Flame, X, ChevronRight, BarChart2, Tag, Sparkles } from 'lucide-react';
-import type { VideoMetrics } from '@/types/youtube';
+import React, { useMemo, useState } from 'react';
+import { Download, Share2, Flame, X, ChevronRight, BarChart2, Tag, Sparkles } from 'lucide-react';
+import type { AiVideoInsight, VideoMetrics } from '@/types/youtube';
 import { exportToCsv, formatNumber, formatDuration } from '@/lib/metrics';
 
 export function DataTable({
@@ -10,11 +10,13 @@ export function DataTable({
   videos,
   channelTitle,
   emptyStateMessage,
+  aiVideoInsights,
 }: {
   title: string;
   videos: VideoMetrics[];
   channelTitle: string;
   emptyStateMessage?: string;
+  aiVideoInsights?: AiVideoInsight[];
 }) {
   const [selectedVideo, setSelectedVideo] = useState<VideoMetrics | null>(null);
 
@@ -37,6 +39,14 @@ export function DataTable({
         )
       ).slice(0, 5)
     : [];
+
+  const selectedVideoInsight = useMemo(() => {
+    if (!selectedVideo || !aiVideoInsights) {
+      return null;
+    }
+
+    return aiVideoInsights.find((insight) => insight.videoId === selectedVideo.id) ?? null;
+  }, [aiVideoInsights, selectedVideo]);
 
   const formatPublishedDate = (publishedAt: string) =>
     new Date(publishedAt).toLocaleDateString('en-US', {
@@ -68,9 +78,18 @@ export function DataTable({
               <th className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Video</th>
               <th className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Published</th>
               <th className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-right">Views</th>
-              <th className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-right">CTR</th>
-              <th className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-right">Velocity</th>
-              <th className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center">Actions</th>
+              <th
+                title="Engagement Rate: percentage of viewers who liked or commented relative to total views"
+                className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center"
+              >
+                Engagement Rate
+              </th>
+              <th
+                title="Velocity: average views per day since the video was published"
+                className="py-3 px-6 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-right"
+              >
+                Velocity
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -103,18 +122,13 @@ export function DataTable({
                   </td>
                   <td className="py-4 px-6 text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{formatPublishedDate(video.publishedAt)}</td>
                   <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{formatNumber(video.viewCount)}</td>
-                  <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{video.engagementRate}%</td>
+                  <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-center">{video.engagementRate}%</td>
                   <td className="py-4 px-6 text-sm text-zinc-900 dark:text-zinc-100 font-medium text-right">{formatNumber(video.velocity)}/day</td>
-                  <td className="py-4 px-6 text-right">
-                    <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors" onClick={(e) => { e.stopPropagation(); }}>
-                      <MoreHorizontal size={18} />
-                    </button>
-                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-14 text-center">
+                <td colSpan={5} className="px-6 py-14 text-center">
                   <div className="mx-auto max-w-md rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/80 px-6 py-8 dark:border-zinc-800 dark:bg-zinc-950/40">
                     <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">No videos in this range</p>
                     <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
@@ -166,11 +180,37 @@ export function DataTable({
 
               <div>
                 <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3 flex items-center gap-2">
-                  <Sparkles size={16} className="text-emerald-500" /> AI Retention Insights
+                  <Sparkles size={16} className="text-emerald-500" /> AI Video Insight
                 </h4>
-                <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-4 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  Performance score is {selectedVideo.performanceScore} with {selectedVideo.isTrending ? 'above-channel-average' : 'normal'} velocity. This is measured against this channel&apos;s own recent catalog, not YouTube-wide trending.
-                </div>
+                {selectedVideoInsight ? (
+                  <div className="space-y-4">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-4 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                      {selectedVideoInsight.whyItWorked}
+                    </div>
+                    <div className="bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Risk to Watch</p>
+                      <p className="mt-2">{selectedVideoInsight.risks}</p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-100 bg-white p-4 dark:border-emerald-900/30 dark:bg-zinc-950/50">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">Next Title Ideas</p>
+                      <div className="mt-3 space-y-2 text-sm text-zinc-700 dark:text-zinc-200">
+                        {selectedVideoInsight.nextTitleIdeas.map((idea) => (
+                          <div key={idea} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900/80">
+                            {idea}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-4 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">Packaging Tip</p>
+                      <p className="mt-2">{selectedVideoInsight.packagingTip}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-4 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                    Performance score is {selectedVideo.performanceScore} with {selectedVideo.isTrending ? 'above-channel-average' : 'normal'} velocity. This is measured against this channel&apos;s own recent catalog, not YouTube-wide trending.
+                  </div>
+                )}
               </div>
 
               <div>
