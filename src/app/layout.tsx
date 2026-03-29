@@ -3,8 +3,8 @@ import '../styles/index.css';
 import { ThemeLayout } from './components/ThemeLayout';
 
 export const metadata: Metadata = {
-  title: 'VidMetrics3',
-  description: 'YouTube channel analytics in the VidMetrics3 dashboard design.',
+  title: 'VidMetrics',
+  description: 'YouTube channel analytics with live metrics, comparison views, and AI-driven insights.',
 };
 
 export const viewport: Viewport = {

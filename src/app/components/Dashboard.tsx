@@ -143,9 +143,9 @@ export function Dashboard({
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 md:flex-row">
+    <div className="flex min-h-dvh w-full flex-col overflow-x-clip bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 md:h-screen md:flex-row md:overflow-hidden">
       <Sidebar activeSection={activeSection} onSectionSelect={handleSectionSelect} />
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="relative flex min-w-0 flex-1 flex-col">
         <TopNav channelQuery={channelQuery} />
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
           <div className="max-w-7xl mx-auto space-y-8">

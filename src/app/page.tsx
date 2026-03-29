@@ -106,11 +106,11 @@ function HomePageShell({
               YouTube Analytics
             </div>
             <h1 className={`mt-6 max-w-2xl text-4xl font-bold tracking-tight md:text-5xl ${isDarkMode ? 'text-zinc-50' : 'text-zinc-950'}`}>
-              Analyze any YouTube channel inside the VidMetrics3 workspace.
+              Analyze any YouTube channel with clear, actionable performance insights.
             </h1>
             <p className={`mt-4 max-w-xl text-base leading-7 ${isDarkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              Paste a channel URL, custom URL, or handle to pull live channel stats, video performance,
-              engagement, velocity, and outlier detection using the working YouTube API flow.
+              Paste a channel URL, custom URL, or handle to review live channel stats, video performance,
+              engagement, velocity, and standout uploads in one focused dashboard.
             </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <FeaturePill icon={<TrendingUp size={16} />} label="Real channel metrics" isDarkMode={isDarkMode} />

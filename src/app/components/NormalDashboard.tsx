@@ -202,7 +202,7 @@ export function NormalDashboard({
               />
             ) : null}
 
-            <div className="relative z-10 p-6">
+            <div className="relative z-10 p-4 sm:p-6">
               <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
               <div className="flex items-start gap-4">
                 <img
@@ -210,12 +210,12 @@ export function NormalDashboard({
                   alt={analysis.channel.title}
                   className="h-16 w-16 rounded-2xl border border-white/15 object-cover shadow-sm"
                 />
-                <div className="space-y-2">
+                <div className="min-w-0 space-y-2">
                   <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
                     Channel Intelligence
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white">{analysis.channel.title}</h3>
+                    <h3 className="text-xl font-semibold text-white break-words">{analysis.channel.title}</h3>
                     <p className="mt-1 text-sm text-zinc-300">
                       {getChannelIdentity(analysis.channel.customUrl, analysis.channel.title)}
                     </p>
@@ -225,7 +225,7 @@ export function NormalDashboard({
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {overviewStats.map((stat) => (
-                  <div key={stat.label} className="min-w-[160px] rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 backdrop-blur-sm">
+                  <div key={stat.label} className="min-w-0 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 backdrop-blur-sm">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{stat.label}</p>
                     <p className="mt-2 text-lg font-semibold text-white">{stat.value}</p>
                     <p className="mt-1 text-xs text-zinc-400">{stat.subtext}</p>
@@ -289,7 +289,7 @@ export function NormalDashboard({
                   placeholder="https://youtube.com/@yourchannel or @yourchannel"
                   className="h-11 flex-1 rounded-xl border border-sky-200 bg-white px-4 text-sm text-zinc-700 outline-none transition focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/20 dark:border-sky-900/40 dark:bg-zinc-950 dark:text-zinc-200"
                 />
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <button
                     type="submit"
                     className="inline-flex h-11 items-center justify-center rounded-xl bg-sky-500 px-4 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-70"
