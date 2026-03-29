@@ -39,13 +39,13 @@ export function TopNav({ channelQuery }: TopNavProps) {
   }
 
   return (
-    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-20">
-      <div className="flex items-center gap-4">
-        <Link href="/" className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+    <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/50 px-4 py-3 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/50 md:px-6 md:py-3">
+      <div className="flex items-center gap-3">
+        <Link href="/" className="shrink-0 text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-xl">
           VidMetrics
         </Link>
-        <form onSubmit={onSubmit} className="relative hidden md:block">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-500 dark:text-zinc-400 w-80">
+        <form onSubmit={onSubmit} className="relative min-w-0 flex-1">
+          <div className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-1.5 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:w-80">
             <Search size={16} />
             <input
               value={value}
@@ -58,12 +58,9 @@ export function TopNav({ channelQuery }: TopNavProps) {
             <p className="absolute top-full mt-2 text-xs text-red-600 dark:text-red-400">{channelError}</p>
           )}
         </form>
-      </div>
-
-      <div className="flex items-center gap-6">
         <button 
           onClick={toggleTheme}
-          className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors"
+          className="shrink-0 rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>

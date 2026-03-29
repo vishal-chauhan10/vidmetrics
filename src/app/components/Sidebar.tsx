@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, BarChart3, Users, Settings, Video, type LucideIcon } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Sparkles, Video, type LucideIcon } from 'lucide-react';
 
 export type DashboardSectionId = 'overview' | 'strategy' | 'trends' | 'videos';
 
@@ -13,49 +13,77 @@ interface SidebarProps {
 
 const navItems: Array<{ id: DashboardSectionId; label: string; icon: LucideIcon }> = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'strategy', label: 'Strategy', icon: Users },
+  { id: 'strategy', label: 'Strategy', icon: Sparkles },
   { id: 'trends', label: 'Trends', icon: BarChart3 },
   { id: 'videos', label: 'Videos', icon: Video },
 ];
 
 export function Sidebar({ activeSection, onSectionSelect }: SidebarProps) {
   return (
-    <aside className="w-16 flex-shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col items-center py-6 gap-8 z-10 h-full">
-      <Link
-        href="/"
-        aria-label="Go to landing page"
-        className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20"
-      >
-        V
-      </Link>
-      <nav className="flex flex-col gap-6 w-full items-center text-zinc-400 dark:text-zinc-500">
-        {navItems.map(({ id, label, icon: Icon }) => {
-          const isActive = activeSection === id;
+    <>
+      <aside className="hidden h-full w-16 shrink-0 flex-col items-center gap-8 border-r border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-950 md:flex">
+        <Link
+          href="/"
+          aria-label="Go to landing page"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-xl font-bold text-white shadow-lg shadow-emerald-500/20"
+        >
+          V
+        </Link>
+        <nav className="flex w-full flex-col items-center gap-6 text-zinc-400 dark:text-zinc-500">
+          {navItems.map(({ id, label, icon: Icon }) => {
+            const isActive = activeSection === id;
 
-          return (
-            <button
-              key={id}
-              type="button"
-              aria-label={label}
-              title={label}
-              onClick={() => onSectionSelect(id)}
-              className={`p-3 rounded-xl transition-colors ${
-                isActive
-                  ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                  : 'hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
-              }`}
-            >
-              <Icon size={20} />
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-label={label}
+                title={label}
+                onClick={() => onSectionSelect(id)}
+                className={`rounded-xl p-3 transition-colors ${
+                  isActive
+                    ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
+                    : 'hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
+                }`}
+              >
+                <Icon size={20} />
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      <nav className="fixed bottom-4 left-4 right-4 z-30 flex items-center justify-between rounded-2xl border border-zinc-200 bg-white/95 px-3 py-2 shadow-xl shadow-zinc-300/20 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 dark:shadow-black/20 md:hidden">
+        <Link
+          href="/"
+          aria-label="Go to landing page"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-lg font-bold text-white shadow-lg shadow-emerald-500/20"
+        >
+          V
+        </Link>
+        <div className="flex items-center gap-1">
+          {navItems.map(({ id, label, icon: Icon }) => {
+            const isActive = activeSection === id;
+
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-label={label}
+                title={label}
+                onClick={() => onSectionSelect(id)}
+                className={`rounded-xl p-3 transition-colors ${
+                  isActive
+                    ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
+                    : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
+                }`}
+              >
+                <Icon size={18} />
+              </button>
+            );
+          })}
+        </div>
       </nav>
-      <div className="mt-auto flex flex-col gap-6 items-center w-full text-zinc-400 dark:text-zinc-500">
-        <button type="button" className="p-3 rounded-xl hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 transition-colors">
-          <Settings size={20} />
-        </button>
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100&h=100" alt="User" className="w-9 h-9 rounded-full object-cover border border-zinc-200 dark:border-zinc-800" />
-      </div>
-    </aside>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, LoaderCircle, Plus, X } from 'lucide-react';
+import { isWithinInterval, startOfMonth, subDays } from 'date-fns';
 import { KPICards } from './KPICards';
 import { StrategySummary } from './StrategySummary';
 import { PerformanceTrends } from './PerformanceTrends';
@@ -120,6 +121,14 @@ export function NormalDashboard({
     ];
   }, [analysis.averageEngagement, analysis.channel.subscriberCount, analysis.totalViews, compareAnalysis, videos.length]);
 
+  const compareVideos = useMemo(() => {
+    if (!compareAnalysis) {
+      return [];
+    }
+
+    return filterAndSortVideos(compareAnalysis.videos, timeRange, sortField);
+  }, [compareAnalysis, sortField, timeRange]);
+
   function handleCompareSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     onCompareChannelChange(compareValue);
@@ -134,18 +143,18 @@ export function NormalDashboard({
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500">
       <section id="overview" data-dashboard-section="overview" className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-2">
+        <div className="mb-2 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{analysis.channel.title}</h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
               {analysis.periodLabel} performance snapshot with AI-driven insights.
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start md:justify-end">
             <select
               value={timeRange}
               onChange={(event) => onTimeRangeChange(event.target.value as TimeRange)}
-              className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+              className="h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 sm:w-auto"
             >
               <option value="month">This Month</option>
               <option value="7d">Last 7 Days</option>
@@ -154,7 +163,7 @@ export function NormalDashboard({
             <select
               value={sortField}
               onChange={(event) => onSortFieldChange(event.target.value as SortField)}
-              className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+              className="h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 sm:w-auto"
             >
               <option value="publishedAt">Recently Uploaded</option>
               <option value="viewCount">Most Viewed</option>
@@ -162,7 +171,7 @@ export function NormalDashboard({
             <button
               type="button"
               onClick={() => setIsCompareOpen((current) => !current)}
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 text-sm font-medium text-emerald-600 transition hover:bg-emerald-500/15 dark:text-emerald-400"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 text-sm font-medium text-emerald-600 transition hover:bg-emerald-500/15 dark:text-emerald-400 sm:w-auto"
             >
               <Plus size={15} />
               Add Your Channel
@@ -398,6 +407,8 @@ export function NormalDashboard({
           channelTitle={analysis.channel.title}
           emptyStateMessage={emptyVideosMessage}
           aiVideoInsights={analysis.aiVideoInsights}
+          compareVideos={compareVideos}
+          compareChannelTitle={compareAnalysis?.channel.title}
         />
       </section>
     </div>
@@ -505,4 +516,29 @@ function getSignedPercentDeltaStat(value: number, benchmark: number) {
     isPositive,
     deltaToneClass: isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400',
   };
+}
+
+function filterAndSortVideos(videos: VideoMetrics[], timeRange: TimeRange, sortField: SortField) {
+  let nextVideos = [...videos];
+  const now = new Date();
+
+  if (timeRange === '7d') {
+    nextVideos = nextVideos.filter((video) =>
+      isWithinInterval(new Date(video.publishedAt), { start: subDays(now, 7), end: now })
+    );
+  } else if (timeRange === 'month') {
+    nextVideos = nextVideos.filter((video) =>
+      isWithinInterval(new Date(video.publishedAt), { start: startOfMonth(now), end: now })
+    );
+  }
+
+  nextVideos.sort((a, b) => {
+    if (sortField === 'viewCount') {
+      return b.viewCount - a.viewCount;
+    }
+
+    return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+  });
+
+  return nextVideos;
 }

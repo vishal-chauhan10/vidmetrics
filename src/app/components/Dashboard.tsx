@@ -143,11 +143,11 @@ export function Dashboard({
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
+    <div className="flex h-screen w-full overflow-hidden bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 md:flex-row">
       <Sidebar activeSection={activeSection} onSectionSelect={handleSectionSelect} />
       <main className="flex-1 flex flex-col min-w-0">
         <TopNav channelQuery={channelQuery} />
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 md:p-8">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
           <div className="max-w-7xl mx-auto space-y-8">
             {isBattleMode ? null : (
               <NormalDashboard
@@ -174,7 +174,7 @@ export function Dashboard({
             type="button"
             onClick={handleScrollToTop}
             aria-label="Scroll to top"
-            className="absolute bottom-6 right-6 inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-700 shadow-lg shadow-zinc-300/30 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-200 dark:shadow-black/30"
+            className="absolute bottom-24 right-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-700 shadow-lg shadow-zinc-300/30 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-200 dark:shadow-black/30 md:bottom-6 md:right-6"
           >
             <ArrowUp size={18} />
           </button>
